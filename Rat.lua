@@ -1,4 +1,6 @@
---########### RaidAbilityTracker
+--########### Raid Ability Tracker 
+--########### By Atreyyo @ VanillaGaming.org
+--##########################################
 
 Rat = CreateFrame("Button", "Rat", UIParent); -- Create first frame
 Rat.Mainframe = CreateFrame("Frame","RMF",UIParent) -- Create Mainframe
@@ -11,7 +13,7 @@ Rat_Version = GetAddOnMetadata("Rat", "Version")
 
 RAT_CP_OBJ=nil
 RAT_CP_TYPE=nil
-
+Rat_unit = UnitName("player") 
 -- Tables
 
 RatTbl = {}
@@ -188,7 +190,7 @@ Rat:RegisterEvent("BAG_UPDATE_COOLDOWN")
 -- function to handle events
 
 function Rat:OnEvent()
-	if (event == "ADDON_LOADED") and arg1 == "Rat" then
+	if (event == "ADDON_LOADED") and arg1 == "RAT" then
 		DEFAULT_CHAT_FRAME:AddMessage("|cFFF5F54A RaidAbilityTracker:|r Loaded!")
 		DEFAULT_CHAT_FRAME:AddMessage("|cFFF5F54A Rat:|r type |cFFFFFF00 /Rat show|r to show frame",1,1,1)
 		DEFAULT_CHAT_FRAME:AddMessage("|cFFF5F54A Rat:|r type |cFFFFFF00 /Rat hide|r to hide frame",1,1,1)
@@ -271,8 +273,6 @@ function Rat.Version:Check()
 			end
 			VersionFTbl[name] = VersionFTbl[name] or Rat.Version:Insert(name)
 			local frame = VersionFTbl[name]
-			--frame:SetWidth(20)
-			--frame:SetHeight(10)
 			frame:SetPoint("TOPLEFT",1+xaxis,-(1+(15*count)+yaxis))
 			frame.text:SetText(name.." |cFFFFFFFFv"..version)
 			frame.text:SetTextColor(1,1,1,1) 
@@ -359,7 +359,6 @@ end
 -- function to config mainframe
 
 function Rat.Mainframe:ConfigFrame()
-
 	if Rat_Settings["topbarcolor"] == nil then
 		Rat_Settings["topbarcolor"] = {["r"] = 0.1, ["g"] = 0.1, ["b"] = 1}
 	end
@@ -841,7 +840,6 @@ function Rat.Options:ConfigFrame()
 	self.Background.Bottommid:SetHeight(296) -- for your Texture
 	self.Background.Bottommid:SetBackdrop(backdrop)
 	self.Background.Bottommid:SetPoint("TOPLEFT", self, "TOPLEFT", 193, -191)
-	--self.Background.Bottommid:SetFrameLevel(2)
 	
 	-- Bottomright Background Frame
 	local backdrop = {bgFile = "Interface\\auctionframe\\ui-auctionframe-browse-botright"}  -- path to the background texture
@@ -2053,7 +2051,6 @@ function Rat.Minimap:CreateMinimapIcon()
 	self:SetPoint("CENTER", -75, -20)
 	
 	self.Button = CreateFrame("Button",nil,self)
-	--self.Button:SetFrameStrata('HIGH')	
 	self.Button:SetPoint("CENTER",0,0)
 	self.Button:SetWidth(31)
 	self.Button:SetHeight(31)
@@ -2093,16 +2090,12 @@ end
 function Rat:SetColor()
 	local r,g,b = ColorPickerFrame:GetColorRGB();
 	local swatch,frame;
-	--swatch = getglobal(VCB_BF_COLOR_OBJ:GetName().."NormalTexture"); -- juste le visuel
 	frame = getglobal(RAT_CP_OBJ:GetName());      -- enregistre la couleur
-	--swatch:SetVertexColor(r,g,b);
 	frame.r = r;
 	frame.g = g;
 	frame.b = b;
 	
-	--Rat:Print("SetColor")
 	if RAT_CP_TYPE == "topbarcolor" then
-	--Rat:Print("topbarcolor")
 		topbg:SetTexture(r,g,b)
 		topbg:SetGradientAlpha("Vertical", 1,1,1, 0.25, 1, 1, 1, 1)
 		Rat.Options.Background.topbarcolor.Texture:SetTexture(r,g,b)
@@ -2110,13 +2103,11 @@ function Rat:SetColor()
 		Rat_Settings[RAT_CP_TYPE]["g"] = g
 		Rat_Settings[RAT_CP_TYPE]["b"] = b
 	elseif RAT_CP_TYPE == "abilitybarcolor" then
-	--Rat:Print("abilitybarcolor")
 		Rat.Options.Background.abilitybarcolor.Texture:SetTexture(r,g,b)
 		Rat_Settings[RAT_CP_TYPE]["r"] = r
 		Rat_Settings[RAT_CP_TYPE]["g"] = g
 		Rat_Settings[RAT_CP_TYPE]["b"] = b	
 	elseif RAT_CP_TYPE == "abilitytextcolor" then
-	--Rat:Print("abilitytextcolor")
 		Rat.Options.Background.abilitytextcolor.Texture:SetTexture(r,g,b)
 		Rat_Settings[RAT_CP_TYPE]["r"] = r
 		Rat_Settings[RAT_CP_TYPE]["g"] = g
@@ -2129,13 +2120,13 @@ function Rat:CancelColor()
 	local g = ColorPickerFrame.previousValues.g;
 	local b = ColorPickerFrame.previousValues.b;
 	local swatch,frame;
-	--swatch = getglobal(VCB_BF_COLOR_OBJ:GetName().."NormalTexture"); -- juste le visuel
+
 	frame = getglobal(RAT_CP_OBJ:GetName());      -- enregistre la couleur
-	--swatch:SetVertexColor(r,g,b);
+
 	frame.r = r;
 	frame.g = g;
 	frame.b = b;
-	--Rat:Print("Cancelcolor")
+
 	if RAT_CP_TYPE == "topbarcolor" then
 		topbg:SetTexture(r,g,b)
 		topbg:SetGradientAlpha("Vertical", 1,1,1, 0.25, 1, 1, 1, 1)
@@ -2543,7 +2534,6 @@ function Rat:Update(force)
 			for name,_ in pairs(RatTbl) do
 				for ability, _ in pairs(RatTbl[name]) do
 					if RatTbl[name][ability]["duration"] == skey and RatTbl[name][ability]["cd"] ~= nil then 
-						--local r, l, t, b = Rat:ClassPos(Rat:GetClass(name))
 						local tname = name..ability
 						local texture = cdtbl[ability]
 						local bardecay = 1-((RatTbl[name][ability]["cd"]-(RatTbl[name][ability]["duration"]-GetTime())) / RatTbl[name][ability]["cd"])

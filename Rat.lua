@@ -190,7 +190,7 @@ Rat:RegisterEvent("BAG_UPDATE_COOLDOWN")
 -- function to handle events
 
 function Rat:OnEvent()
-	if (event == "ADDON_LOADED") and arg1 == "RAT" then
+	if (event == "ADDON_LOADED") and (arg1 == "Rat" or arg1 == "rat" or arg1 == "RAT") then
 		DEFAULT_CHAT_FRAME:AddMessage("|cFFF5F54A RaidAbilityTracker:|r Loaded!")
 		DEFAULT_CHAT_FRAME:AddMessage("|cFFF5F54A Rat:|r type |cFFFFFF00 /Rat show|r to show frame",1,1,1)
 		DEFAULT_CHAT_FRAME:AddMessage("|cFFF5F54A Rat:|r type |cFFFFFF00 /Rat hide|r to hide frame",1,1,1)

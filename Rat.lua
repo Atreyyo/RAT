@@ -14,6 +14,72 @@ Rat_Version = GetAddOnMetadata("Rat", "Version")
 RAT_CP_OBJ=nil
 RAT_CP_TYPE=nil
 Rat_unit = UnitName("player") 
+
+-- loacalization
+local L = {}
+
+if (GetLocale() == "deDE") then
+	L = {
+		["Anregen"] = "Innervate",
+		["Herausforderndes Gebrüll"] = "Challenging Roar",
+		["Herausforderungsruf"] = "Challenging Shout",
+		["Wiedergeburt"] = "Rebirth",
+		["Schildwall"] = "Shield Wall",
+		["Berserkerwut"] = "Berserker Rage",
+		["Zuschlagen"] = "Pummel",
+		["Entwaffnen"] = "Disarm",
+		["Erheblicher Seelenstein"] = "Major Soulstone",
+		["Handauflegung"] = "Lay on Hands",
+		["Segen des Schutzes"] = "Blessing of Protection",
+		["Gottesschild"] = "Divine Shield",
+		["Göttlicher Eingriff"] = "Divine Intervention",
+		["Einlullender Schuss"] = "Tranquilizing Shot",
+		["Tritt"] = "Kick",
+		["Reinkarnation"] = "Reincarnation",
+		["Totem der Manaflut"] = "Mana Tide Totem",	
+	}
+elseif (GetLocale() == "frFR") then
+	L = { 
+		["Innervation"] = "Innervate",
+		["Rugissement provocateur"] = "Challenging Roar",
+		["Cri de défi"] = "Challenging Shout",
+		["Renaissance"] = "Rebirth",
+		["Mur protecteur"] = "Shield Wall",
+		["Rage berserker"] = "Berserker Rage",
+		["Volée de coups"] = "Pummel",
+		["Désarmement"] = "Disarm",
+		["pierre d'âme supérieure"] = "Major Soulstone",
+		["Imposition des mains"] = "Lay on Hands",
+		["Bénédiction de protection"] = "Blessing of Protection",
+		["Bouclier divin"] = "Divine Shield",
+		["Intervention divine"] = "Divine Intervention",
+		["Tir Tranquillisant"] = "Tranquilizing Shot",
+		["Coup de pied"] = "Kick",
+		["Réincarnation"] = "Reincarnation",
+		["Totem Fontaine de mana"] = "Mana Tide Totem",
+	}
+else
+	L = {
+		["Innervate"] = "Innervate",
+		["Challenging Roar"] = "Challenging Roar",
+		["Challenging Shout"] = "Challenging Shout",
+		["Rebirth"] = "Rebirth",
+		["Shield Wall"] = "Shield Wall",
+		["Berserker Rage"] = "Berserker Rage",
+		["Pummel"] = "Pummel",
+		["Disarm"] = "Disarm",
+		["Major Soulstone"] = "Major Soulstone",
+		["Lay on Hands"] = "Lay on Hands",
+		["Blessing of Protection"] = "Blessing of Protection",
+		["Divine Shield"] = "Divine Shield",
+		["Divine Intervention"] = "Divine Intervention",
+		["Tranquilizing Shot"] = "Tranquilizing Shot",
+		["Kick"] = "Kick",
+		["Reincarnation"] = "Reincarnation",
+		["Mana Tide Totem"] = "Mana Tide Totem",	
+	}
+end																	
+
 -- Tables
 
 RatTbl = {}
@@ -312,7 +378,7 @@ function Rat.Version:Insert(name)
 	return frame
 end
 
--- function to congig versionframe
+-- function to config versionframe
 
 function Rat.Version:ConfigFrame()
 
@@ -2192,25 +2258,25 @@ function getInvCd()
 				local s_time, duration, enabled = GetContainerItemCooldown(rbag, rslot)
 				if enabled == 1 then
 					local name = Rat:hyperlink_name(GetContainerItemLink(rbag, rslot))
-					for i,_ in pairs(cdtbl) do
-						if i == name then
-							if RatTbl[Rat_unit][i] == nil then RatTbl[Rat_unit][i] = { } end
+					for k,v in pairs(L) do
+						if k == name then
+							if RatTbl[Rat_unit][v] == nil then RatTbl[Rat_unit][v] = { } end
 							if duration > 2.5 then
 								local timeleft = duration-(GetTime()-s_time)
 								if (duration-math.floor(timeleft)) == 0 then
-									SendAddonMessage("RATSYNC["..duration.."]("..i..")",timeleft,"RAID")
-									RatTbl[Rat_unit][i]["duration"] = timeleft+GetTime()
-									RatTbl[Rat_unit][i]["cd"] = duration
-									sendThrottle[i] = GetTime()
+									SendAddonMessage("RATSYNC["..duration.."]("..v..")",timeleft,"RAID")
+									RatTbl[Rat_unit][v]["duration"] = timeleft+GetTime()
+									RatTbl[Rat_unit][v]["cd"] = duration
+									sendThrottle[v] = GetTime()
 								end
-								if sendThrottle[i] == nil or (GetTime() - sendThrottle[i]) > 10 then
-									SendAddonMessage("RATSYNC["..duration.."]("..i..")",timeleft,"RAID")
-									RatTbl[Rat_unit][i]["duration"] = timeleft+GetTime()
-									RatTbl[Rat_unit][i]["cd"] = duration
-									sendThrottle[i] = GetTime()
+								if sendThrottle[v] == nil or (GetTime() - sendThrottle[v]) > 10 then
+									SendAddonMessage("RATSYNC["..duration.."]("..v..")",timeleft,"RAID")
+									RatTbl[Rat_unit][v]["duration"] = timeleft+GetTime()
+									RatTbl[Rat_unit][v]["cd"] = duration
+									sendThrottle[v] = GetTime()
 								end
 							elseif duration == 0 then
-								RatTbl[Rat_unit][name]["duration"] = 0
+								RatTbl[Rat_unit][v]["duration"] = 0
 							end
 						end
 					end
@@ -2226,15 +2292,15 @@ function getSpells()
 	if RatTbl[Rat_unit] == nil then RatTbl[Rat_unit] = { } end
 	while (spell) do
 		local start, duration, hasCooldown = GetSpellCooldown(spellID, BOOKTYPE_SPELL)
-		for i,v in pairs(cdtbl) do
-			if i == spell then
-				if RatTbl[Rat_unit][spell] == nil then RatTbl[Rat_unit][spell] = { } end
+		for k,v in pairs(L) do
+			if k == spell then
+				if RatTbl[Rat_unit][v] == nil then RatTbl[Rat_unit][v] = { } end
 				if hasCooldown == 1 and duration > 2.5 then
 					local timeleft = duration-(GetTime()-start)
-						RatTbl[Rat_unit][spell]["duration"] = timeleft+GetTime()
-						RatTbl[Rat_unit][spell]["cd"] = duration
+						RatTbl[Rat_unit][v]["duration"] = timeleft+GetTime()
+						RatTbl[Rat_unit][v]["cd"] = duration
 				else
-					RatTbl[Rat_unit][spell]["duration"] = 0
+					RatTbl[Rat_unit][v]["duration"] = 0
 				end
 			end
 		end
@@ -2252,18 +2318,18 @@ function sendCds()
 		if RatTbl[Rat_unit] == nil then RatTbl[Rat_unit] = { } end
 		while (spell) do
 			local start, duration, hasCooldown = GetSpellCooldown(spellID, BOOKTYPE_SPELL)
-			for i,_ in pairs(RatTbl[Rat_unit]) do
-				if i == spell then
+			for k,v in pairs(RatTbl[Rat_unit]) do
+				if L[k] == spell then
 				
 					if hasCooldown == 1 and duration > 2.5 then
 					local timeleft = duration-(GetTime()-start)
-						if (RatTbl[Rat_unit][i]["cd"]-math.floor(timeleft)) == 0 then
-							SendAddonMessage("RATSYNC["..duration.."]("..i..")",timeleft,"RAID")
-							sendThrottle[i] = GetTime()
+						if (RatTbl[Rat_unit][k]["cd"]-math.floor(timeleft)) == 0 then
+							SendAddonMessage("RATSYNC["..duration.."]("..k..")",timeleft,"RAID")
+							sendThrottle[k] = GetTime()
 						end
-						if sendThrottle[i] == nil or (GetTime() - sendThrottle[i]) > 10 then
-							SendAddonMessage("RATSYNC["..duration.."]("..i..")",timeleft,"RAID")
-							sendThrottle[i] = GetTime()
+						if sendThrottle[k] == nil or (GetTime() - sendThrottle[k]) > 10 then
+							SendAddonMessage("RATSYNC["..duration.."]("..k..")",timeleft,"RAID")
+							sendThrottle[k] = GetTime()
 						end
 					else
 					end

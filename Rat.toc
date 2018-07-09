@@ -1,7 +1,7 @@
 ## Interface: 11200
 ## Title: Rat |cff7fff7fby |cffF5F54AAtreyyo
 ## Author: Atreyyo
-## Version: 1.9.6
+## Version: 1.9.6b
 ## Notes: Raid Ability Tracker
 ## DefaultState: Enabled
 ## LoadOnDemand: 0

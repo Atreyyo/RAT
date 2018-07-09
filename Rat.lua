@@ -275,8 +275,8 @@ function Rat:OnEvent()
 		if string.sub(arg1,1,3) == "RAT" then
 			if Rat_unit ~= arg4 then 
 				if string.sub(arg1,4,7) == "SYNC" then
-					local cd = string.sub(arg1, string.find(arg1, "[", 1, true)+1, string.find(arg1, "]", 1, true)-1)
-					local duration = arg2
+					local cd = tonumber(string.sub(arg1, string.find(arg1, "[", 1, true)+1, string.find(arg1, "]", 1, true)-1))
+					local duration = tonumber(arg2)
 					local cdname = string.sub(arg1, string.find(arg1, "(", 1, true)+1, string.find(arg1, ")", 1, true)-1)
 					local name = arg4
 					Rat:AddCd(name,cdname,cd,duration) 
@@ -465,7 +465,7 @@ function Rat.Mainframe:ConfigFrame()
 	}
 	self:SetFrameStrata("LOW")
 	self:SetWidth(250) -- Set these to whatever height/width is needed 
-	self:SetHeight(41) -- for your Texture
+	self:SetHeight(21) -- for your Texture
 	self:SetPoint("CENTER",0,0)
 	self:SetMovable(1)
 	self:EnableMouse(1)
@@ -765,10 +765,10 @@ function Rat.Mainframe:ConfigFrame()
 		}
 	self.Background.Tab1:SetFrameStrata("BACKGROUND")
 	self.Background.Tab1:SetWidth(self:GetWidth())
-	self.Background.Tab1:SetHeight(23)
+	self.Background.Tab1:SetHeight(22)
 	self.Background.Tab1:SetBackdrop(backdrop)
 	self.Background.Tab1:SetBackdropColor(0,0,0,0.5)
-	self.Background.Tab1:SetPoint("TOPLEFT", self, "TOPLEFT", 0, -17)
+	self.Background.Tab1:SetPoint("TOPLEFT", self, "TOPLEFT", 0, -1)
 
 	-- create close button
 	self.CloseButton = CreateFrame("Button",nil,self,"UIPanelCloseButton")
@@ -1912,6 +1912,35 @@ function Rat.Options:ConfigFrame()
 	text:SetShadowOffset(2,-2)
     text:SetText("Ability notification")
 	
+	-- Invert abilities
+	
+	local Checkbox = CreateFrame("CheckButton", "Invert", self.Background.Tab2, "UICheckButtonTemplate")
+	Checkbox:SetParent(self.Background.Tab2)
+	Checkbox:SetPoint("TOPLEFT",70,-180)
+	Checkbox:SetWidth(35)
+	Checkbox:SetHeight(35)
+	Checkbox:SetFrameStrata("MEDIUM")
+	Checkbox:SetScript("OnClick", function () 
+		if Checkbox:GetChecked() == nil then 
+			Rat_Settings["Invert"] = nil
+		elseif Checkbox:GetChecked() == 1 then 
+			Rat_Settings["Invert"] = 1 
+		end
+		end)
+	Checkbox:SetScript("OnEnter", function() 
+		GameTooltip:SetOwner(Checkbox, "ANCHOR_RIGHT");
+		GameTooltip:SetText("Invert abilites upwards", 255, 255, 0, 1, 1);
+		GameTooltip:Show()
+	end)
+	Checkbox:SetScript("OnLeave", function() GameTooltip:Hide() end)
+	Checkbox:SetChecked(Rat_Settings["Invert"])
+	local text = Checkbox:CreateFontString(nil, "OVERLAY")
+    text:SetPoint("LEFT", 45, 0)
+    text:SetFont("Fonts\\FRIZQT__.TTF", 12)
+	text:SetTextColor(1, 1, 1, 1)
+	text:SetShadowOffset(2,-2)
+    text:SetText("Invert abilities")
+	
 	-- create close button
 	self.CloseButton = CreateFrame("Button",nil,self,"UIPanelCloseButton")
 	self.CloseButton:SetPoint("TOPLEFT",self:GetWidth()-23,2)
@@ -2355,9 +2384,11 @@ end
 function Rat:AddCd(name,cdname,cd,duration)
 	if RatTbl[name] == nil then RatTbl[name] = {} end
 	if RatTbl[name][cdname] == nil then RatTbl[name][cdname] = {} end
-	RatTbl[name][cdname]["duration"] = duration+GetTime()
-	RatTbl[name][cdname]["cd"] = cd
-	Rat:Update()
+	if duration > 2.5 then
+		RatTbl[name][cdname]["duration"] = duration+GetTime()
+		RatTbl[name][cdname]["cd"] = cd
+		Rat:Update()
+	end
 end
 
 -- function to check if a player is still in raid
@@ -2594,7 +2625,7 @@ function Rat:Update(force)
 	elseif not IsRaidOfficer("player") then
 		Rat.Options.version:Hide()
 	end
-		_i =  0
+		local i = 1
 		Rat_sorted = sortDB(name)
 		for _, skey in ipairs(Rat_sorted) do
 			for name,_ in pairs(RatTbl) do
@@ -2613,7 +2644,11 @@ function Rat:Update(force)
 						Rat.Mainframe.Background.Top.Title:SetFont("Interface\\AddOns\\Rat\\fonts\\"..Rat_Font[Rat_Settings["font"]]..".TTF", Rat_FontSize[Rat_Settings["font"]]+1)
 						frame:SetWidth(Rat.Mainframe:GetWidth()-4)
 						frame:SetHeight(22)
-						frame:SetPoint("TOPLEFT",2,(-22*_i)+(-2))
+						if Rat_Settings["Invert"] == nil then
+							frame:SetPoint("TOPLEFT",2,(-22*i)+2)
+						else
+							frame:SetPoint("TOPLEFT",2,(22*i))
+						end
 						frame.unit:SetTexture(Rat:GetClassColors(name))
 						frame.unit:SetGradientAlpha("Vertical", 1,1,1, 0, 1, 1, 1, 1)
 						frame.unitname:SetText(name)
@@ -2642,17 +2677,17 @@ function Rat:Update(force)
 							if Rat_Settings[Rat:GetClass(name)] == 1 then
 								if Rat_Settings[ability] == 1 then
 									frame:Show()
-									_i = _i+1
-									Rat.Mainframe:SetHeight(22+(22*_i))
-									Rat.Mainframe.Background.Tab1:SetHeight(Rat.Mainframe:GetHeight()-16)
+									i = i+1
+									--Rat.Mainframe:SetHeight(22+(22*i))
+									--Rat.Mainframe.Background.Tab1:SetHeight(Rat.Mainframe:GetHeight()-16)
 								else
-									Rat.Mainframe:SetHeight(22+(22*_i))
-									Rat.Mainframe.Background.Tab1:SetHeight(Rat.Mainframe:GetHeight()-16)
+									--Rat.Mainframe:SetHeight(22+(22*i))
+									--Rat.Mainframe.Background.Tab1:SetHeight(Rat.Mainframe:GetHeight()-16)
 									frame:Hide()
 								end
 							else
-								Rat.Mainframe:SetHeight(22+(22*_i))
-								Rat.Mainframe.Background.Tab1:SetHeight(Rat.Mainframe:GetHeight()-16)
+								--Rat.Mainframe:SetHeight(22+(22*i))
+								--Rat.Mainframe.Background.Tab1:SetHeight(Rat.Mainframe:GetHeight()-16)
 								frame:Hide()
 							end
 						else
@@ -2663,7 +2698,7 @@ function Rat:Update(force)
 				end
 			end
 		end
-		if _i == 0 then
+		if i == 0 then
 			Rat.Mainframe:SetHeight(22+(22*1))
 			Rat.Mainframe.Background.Tab1:SetHeight(Rat.Mainframe:GetHeight()-16)		
 		end
@@ -2733,4 +2768,29 @@ function rtime(left)
 	this.sec = sec
 
 	return string.format("%02d:%02s", min, sec)
+end
+
+--
+
+if GetRaidRosterInfo(1) then
+	for i=1,GetNumRaidMembers() do
+		local name = UnitName("raid"..i);
+		local class = UnitClass("raid"..i);
+		local hp = UnitHealth("raid"..i) / UnitHealthMax("raid"..i)
+		if (class == "Warrior" or class == "Warlock") and hp < 0.4 and not buffed("Renew", "raid"..i) then
+			TargetUnit("raid"..i);
+			CastSpellByName("Renew");
+		end
+	end
+elseif  GetNumPartyMembers() > 0 then
+	for i=1,GetNumPartyMembers() do
+		local name = UnitName("party"..i);
+		local class = UnitClass("party"..i);
+		local hp = UnitHealth("party"..i) / UnitHealthMax("party"..i)
+		if (class == "Warrior" or class == "Warlock") and hp < 0.4 and not buffed("Renew", "party"..i) then
+			TargetUnit("party"..i);
+			CastSpellByName("Renew");
+		end 
+	end	
+else 
 end

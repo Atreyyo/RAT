@@ -2318,13 +2318,32 @@ end
 function getSpells()
 	local spellID = 1
 	local spell = GetSpellName(spellID, BOOKTYPE_SPELL)
+	local gcd = 0
 	if RatTbl[Rat_unit] == nil then RatTbl[Rat_unit] = { } end
 	while (spell) do
 		local start, duration, hasCooldown = GetSpellCooldown(spellID, BOOKTYPE_SPELL)
+		if hasCooldown and duration > 3 then
+			gcd=gcd+1
+		end		
+		spellID = spellID + 1
+		spell = GetSpellName(spellID, BOOKTYPE_SPELL)		
+	end
+
+	if (gcd / spellID) > 0.5 then
+		gcd = true
+		--print("true")
+		else
+		gcd = false
+		--print("false")
+	end
+	spellID = 1
+	spell = GetSpellName(spellID, BOOKTYPE_SPELL)	
+	while (spell) do
+		local start, duration, hasCooldown = GetSpellCooldown(spellID, BOOKTYPE_SPELL)
 		for k,v in pairs(L) do
-			if k == spell then
+			if k == spell and not gcd then
 				if RatTbl[Rat_unit][v] == nil then RatTbl[Rat_unit][v] = { } end
-				if hasCooldown == 1 and duration > 2.5 then
+				if hasCooldown == 1 and duration > 3 then
 					local timeleft = duration-(GetTime()-start)
 						RatTbl[Rat_unit][v]["duration"] = timeleft+GetTime()
 						RatTbl[Rat_unit][v]["cd"] = duration
@@ -2342,31 +2361,48 @@ end
 -- function to send our cooldowns to the raid
 
 function sendCds()
-		local spellID = 1
-		local spell = GetSpellName(spellID, BOOKTYPE_SPELL)
-		if RatTbl[Rat_unit] == nil then RatTbl[Rat_unit] = { } end
-		while (spell) do
-			local start, duration, hasCooldown = GetSpellCooldown(spellID, BOOKTYPE_SPELL)
-			for k,v in pairs(RatTbl[Rat_unit]) do
-				if L[k] == spell then
-				
-					if hasCooldown == 1 and duration > 2.5 then
-					local timeleft = duration-(GetTime()-start)
-						if (RatTbl[Rat_unit][k]["cd"]-math.floor(timeleft)) == 0 then
-							SendAddonMessage("RATSYNC["..duration.."]("..k..")",timeleft,"RAID")
-							sendThrottle[k] = GetTime()
-						end
-						if sendThrottle[k] == nil or (GetTime() - sendThrottle[k]) > 10 then
-							SendAddonMessage("RATSYNC["..duration.."]("..k..")",timeleft,"RAID")
-							sendThrottle[k] = GetTime()
-						end
-					else
+	local gcd = 0
+	local spellID = 1
+	local spell = GetSpellName(spellID, BOOKTYPE_SPELL)
+	if RatTbl[Rat_unit] == nil then RatTbl[Rat_unit] = { } end
+	while (spell) do
+		local start, duration, hasCooldown = GetSpellCooldown(spellID, BOOKTYPE_SPELL)
+		if hasCooldown and duration > 3 then
+			gcd=gcd+1
+		end		
+		spellID = spellID + 1
+		spell = GetSpellName(spellID, BOOKTYPE_SPELL)		
+	end
+	if (gcd / spellID) > 0.5 then
+		gcd = true
+		--print("true")
+		else
+		gcd = false
+		--print("false")
+	end
+	spellID = 1
+	spell = GetSpellName(spellID, BOOKTYPE_SPELL)
+	while (spell) do
+		local start, duration, hasCooldown = GetSpellCooldown(spellID, BOOKTYPE_SPELL)
+		for k,v in pairs(RatTbl[Rat_unit]) do
+			if L[k] == spell and not gcd then		
+				if hasCooldown == 1 and duration > 3 then
+				local timeleft = duration-(GetTime()-start)
+					if (RatTbl[Rat_unit][k]["cd"]-math.floor(timeleft)) == 0 then
+						SendAddonMessage("RATSYNC["..duration.."]("..k..")",timeleft,"RAID")
+						sendThrottle[k] = GetTime()
 					end
+					if sendThrottle[k] == nil or (GetTime() - sendThrottle[k]) > 10 then
+						SendAddonMessage("RATSYNC["..duration.."]("..k..")",timeleft,"RAID")
+						sendThrottle[k] = GetTime()
+					end
+				else
 				end
-			end		
-			spellID = spellID + 1
-			spell = GetSpellName(spellID, BOOKTYPE_SPELL)
-		end
+			end
+		end		
+		spellID = spellID + 1
+		spell = GetSpellName(spellID, BOOKTYPE_SPELL)
+	end
 	if sendThrottle["Major Soulstone"] == nil or (GetTime() - sendThrottle["Major Soulstone"]) > 10 then
 		if (RatTbl[Rat_unit]["Major Soulstone"]) then
 			if RatTbl[Rat_unit]["Major Soulstone"]["duration"]-GetTime() > 0 then
@@ -2384,7 +2420,7 @@ end
 function Rat:AddCd(name,cdname,cd,duration)
 	if RatTbl[name] == nil then RatTbl[name] = {} end
 	if RatTbl[name][cdname] == nil then RatTbl[name][cdname] = {} end
-	if duration > 2.5 then
+	if duration > 3 then
 		RatTbl[name][cdname]["duration"] = duration+GetTime()
 		RatTbl[name][cdname]["cd"] = cd
 		Rat:Update()

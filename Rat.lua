@@ -283,6 +283,7 @@ function Rat:OnEvent()
 					getSpells()
 					getInvCd()
 					sendCds()
+					--print(name..": "..cdname)
 					Rat:Update(true)
 				end
 				if string.sub(arg1,4,10) == "VERSION" then
@@ -2289,23 +2290,23 @@ function getInvCd()
 					local name = Rat:hyperlink_name(GetContainerItemLink(rbag, rslot))
 					for k,v in pairs(L) do
 						if k == name then
-							if RatTbl[Rat_unit][v] == nil then RatTbl[Rat_unit][v] = { } end
+							if RatTbl[Rat_unit][k] == nil then RatTbl[Rat_unit][k] = { } end
 							if duration > 2.5 then
 								local timeleft = duration-(GetTime()-s_time)
 								if (duration-math.floor(timeleft)) == 0 then
-									SendAddonMessage("RATSYNC["..duration.."]("..v..")",timeleft,"RAID")
-									RatTbl[Rat_unit][v]["duration"] = timeleft+GetTime()
-									RatTbl[Rat_unit][v]["cd"] = duration
-									sendThrottle[v] = GetTime()
+									SendAddonMessage("RATSYNC["..duration.."]("..k..")",timeleft,"RAID")
+									RatTbl[Rat_unit][k]["duration"] = timeleft+GetTime()
+									RatTbl[Rat_unit][k]["cd"] = duration
+									sendThrottle[k] = GetTime()
 								end
-								if sendThrottle[v] == nil or (GetTime() - sendThrottle[v]) > 10 then
-									SendAddonMessage("RATSYNC["..duration.."]("..v..")",timeleft,"RAID")
-									RatTbl[Rat_unit][v]["duration"] = timeleft+GetTime()
-									RatTbl[Rat_unit][v]["cd"] = duration
-									sendThrottle[v] = GetTime()
+								if sendThrottle[k] == nil or (GetTime() - sendThrottle[k]) > 10 then
+									SendAddonMessage("RATSYNC["..duration.."]("..k..")",timeleft,"RAID")
+									RatTbl[Rat_unit][k]["duration"] = timeleft+GetTime()
+									RatTbl[Rat_unit][k]["cd"] = duration
+									sendThrottle[k] = GetTime()
 								end
 							elseif duration == 0 then
-								RatTbl[Rat_unit][v]["duration"] = 0
+								RatTbl[Rat_unit][k]["duration"] = 0
 							end
 						end
 					end
@@ -2342,13 +2343,13 @@ function getSpells()
 		local start, duration, hasCooldown = GetSpellCooldown(spellID, BOOKTYPE_SPELL)
 		for k,v in pairs(L) do
 			if k == spell and not gcd then
-				if RatTbl[Rat_unit][v] == nil then RatTbl[Rat_unit][v] = { } end
+				if RatTbl[Rat_unit][k] == nil then RatTbl[Rat_unit][k] = { } end
 				if hasCooldown == 1 and duration > 3 then
 					local timeleft = duration-(GetTime()-start)
-						RatTbl[Rat_unit][v]["duration"] = timeleft+GetTime()
-						RatTbl[Rat_unit][v]["cd"] = duration
+						RatTbl[Rat_unit][k]["duration"] = timeleft+GetTime()
+						RatTbl[Rat_unit][k]["cd"] = duration
 				else
-					RatTbl[Rat_unit][v]["duration"] = 0
+					RatTbl[Rat_unit][k]["duration"] = 0
 				end
 			end
 		end

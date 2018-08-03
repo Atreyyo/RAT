@@ -2385,15 +2385,15 @@ function sendCds()
 	while (spell) do
 		local start, duration, hasCooldown = GetSpellCooldown(spellID, BOOKTYPE_SPELL)
 		for k,v in pairs(RatTbl[Rat_unit]) do
-			if L[k] == spell and not gcd then		
+			if k == spell and not gcd then		
 				if hasCooldown == 1 and duration > 3 then
 				local timeleft = duration-(GetTime()-start)
 					if (RatTbl[Rat_unit][k]["cd"]-math.floor(timeleft)) == 0 then
-						SendAddonMessage("RATSYNC["..duration.."]("..k..")",timeleft,"RAID")
+						SendAddonMessage("RATSYNC["..duration.."]("..L[k]..")",timeleft,"RAID")
 						sendThrottle[k] = GetTime()
 					end
 					if sendThrottle[k] == nil or (GetTime() - sendThrottle[k]) > 10 then
-						SendAddonMessage("RATSYNC["..duration.."]("..k..")",timeleft,"RAID")
+						SendAddonMessage("RATSYNC["..duration.."]("..L[k]..")",timeleft,"RAID")
 						sendThrottle[k] = GetTime()
 					end
 				else
@@ -2418,6 +2418,12 @@ end
 -- add an ability cooldown we got from a raidmember
 
 function Rat:AddCd(name,cdname,cd,duration)
+	local cdname = cdname
+	for k,v in pairs(L) do
+		if v == cdname then
+			cdname = k
+		end
+	end
 	if RatTbl[name] == nil then RatTbl[name] = {} end
 	if RatTbl[name][cdname] == nil then RatTbl[name][cdname] = {} end
 	if duration > 3 then
